@@ -27,9 +27,14 @@ namespace xCLI
                 MethodInfo mi = cliAction.Method;
                 ParameterInfo[] miParameters = mi.GetParameters();
 
-                object controller = Activator.CreateInstance(cliAction.Controller);
+                ICommandLineArguments commandLineArgs = new CommandLineArguments();
+
+                var controllerFactory = new CliControllerFactory();
+                CliControllerInstance controllerInstance =
+                    controllerFactory.CreateController(cliAction.Controller, commandLineArgs);
+
                 object[] methodArgs = new object[miParameters.Length];
-                object result = mi.Invoke(controller, methodArgs);
+                object result = mi.Invoke(controllerInstance.Instance, methodArgs);
                 if (result is bool)
                 {
                     return (bool)result ? 0 : 1;

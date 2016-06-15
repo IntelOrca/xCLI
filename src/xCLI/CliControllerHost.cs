@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using xCLI.Extensions;
 
@@ -7,7 +8,15 @@ namespace xCLI
 {
     internal class CliControllerHost : ICliControllerHost
     {
-        private Dictionary<string, Type> _controllers = new Dictionary<string, Type>();
+        private List<Type> _controllers = new List<Type>();
+
+        public IReadOnlyCollection<Type> Controllers
+        {
+            get
+            {
+                return new ReadOnlyCollection<Type>(_controllers);
+            }
+        }
 
         public void RegisterController<T>()
         {
@@ -16,32 +25,26 @@ namespace xCLI
 
         public void RegisterController(Type type)
         {
-            CliControllerAttribute controllerAttribute;
-            if (!type.TryGetAttribute(out controllerAttribute))
-            {
-                throw new ArgumentException($"{type} is not decorated with CliControllerAttribute.", nameof(type));
-            }
-
             if (type.GetTypeInfo().IsAbstract)
             {
                 throw new ArgumentException($"{type} can not be abstract.", nameof(type));
             }
 
-            string commandText = controllerAttribute.Command;
-
-            if (_controllers.ContainsKey(commandText))
-            {
-                throw new ArgumentException($"The command {commandText} already has a registered controller.");
-            }
-
-            _controllers.Add(commandText, type);
+            _controllers.Add(type);
         }
 
-        public Type GetRegisteredController(string command)
+        public void RegisterAllControllersWithAttribute()
         {
-            Type type = null;
-            _controllers.TryGetValue(command, out type);
-            return type;
+            Type[] exportedTypes = Assembly.GetEntryAssembly()
+                                           .GetExportedTypes();
+            foreach (Type type in exportedTypes)
+            {
+                CliControllerAttribute controllerAttribute;
+                if (type.TryGetAttribute(out controllerAttribute))
+                {
+                    RegisterController(type);
+                }
+            }
         }
     }
 }

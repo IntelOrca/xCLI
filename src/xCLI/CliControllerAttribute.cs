@@ -7,6 +7,10 @@ namespace xCLI
     {
         public string Command { get; }
 
+        public CliControllerAttribute()
+        {
+        }
+
         public CliControllerAttribute(string command)
         {
             Command = command;

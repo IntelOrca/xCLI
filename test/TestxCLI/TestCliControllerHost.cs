@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using xCLI;
 using Xunit;
 
@@ -6,16 +7,6 @@ namespace TestxCLI
 {
     public class TestCliControllerHost
     {
-        [Fact]
-        public void Controller_Is_Decorated()
-        {
-            var host = new CliControllerHost();
-            Assert.Throws<ArgumentException>(() =>
-            {
-                host.RegisterController<UndecoratedController>();
-            });
-        }
-
         [Fact]
         public void Controller_Not_Abstract()
         {
@@ -37,45 +28,17 @@ namespace TestxCLI
         }
 
         [Fact]
-        public void Controller_Detect_Type_Conflict()
-        {
-            var host = new CliControllerHost();
-            Assert.Throws<ArgumentException>(() =>
-            {
-                host.RegisterController<ExampleControllerA>();
-                host.RegisterController<ExampleControllerA>();
-            });
-        }
-
-        [Fact]
-        public void Controller_Detect_Command_Conflict()
-        {
-            var host = new CliControllerHost();
-            Assert.Throws<ArgumentException>(() =>
-            {
-                host.RegisterController<ExampleControllerA>();
-                host.RegisterController<ExampleControllerB>();
-            });
-        }
-
-        [Fact]
-        public void Get_Registered_Controller_Exist()
+        public void Get_Registered_Controllers()
         {
             var host = new CliControllerHost();
             host.RegisterController<ExampleControllerA>();
-            Type controllerType = host.GetRegisteredController("example");
+            host.RegisterController<ExampleControllerB>();
 
-            Assert.Equal(typeof(ExampleControllerA), controllerType);
-        }
-
-        [Fact]
-        public void Get_Registered_Controller_NotExist()
-        {
-            var host = new CliControllerHost();
-            host.RegisterController<ExampleControllerA>();
-            Type controllerType = host.GetRegisteredController("other");
-
-            Assert.Null(controllerType);
+            Type[] expectedControllers = new[] { typeof(ExampleControllerA),
+                                                 typeof(ExampleControllerB) };
+            Type[] controllers = host.Controllers.OrderBy(x => x.Name)
+                                                 .ToArray();
+            Assert.Equal(expectedControllers, controllers);
         }
 
         public class UndecoratedController { }

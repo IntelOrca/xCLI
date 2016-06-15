@@ -1,29 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace xCLI
 {
     [AttributeUsage(AttributeTargets.Property |
                     AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public class CliSwitchAttribute : Attribute
+    public class CliOptionAttribute : Attribute
     {
         public char ShortName { get; }
         public string LongName { get; }
 
-        public CliSwitchAttribute()
+        public CliOptionAttribute()
         {
         }
 
-        public CliSwitchAttribute(char shortName)
+        public CliOptionAttribute(char shortName)
         {
             ShortName = shortName;
         }
 
-        public CliSwitchAttribute(string longName)
+        public CliOptionAttribute(string longName)
         {
             LongName = longName;
         }
 
-        public CliSwitchAttribute(char shortName, string longName)
+        public CliOptionAttribute(char shortName, string longName)
         {
             ShortName = shortName;
             LongName = longName;
